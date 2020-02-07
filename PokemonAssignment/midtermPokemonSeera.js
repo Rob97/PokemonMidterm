@@ -3,14 +3,16 @@
 (function () {
 
 
-    let data = "";
-    let svgContainer = "";
-    let xAxisDataColumnName = "Sp. Def";
-    let yAxisDataColumnName = "Total";
+    var data = "";
+    var svgContainer = "";
+    var xAxisDataColumnName = "Sp. Def";
+    var yAxisDataColumnName = "Total";
 
-    let xAxisData = null;
-    let yAxisData = null;
+    var xAxisData = null;
+    var yAxisData = null;
     const limits = null;
+    let filter1 = null;
+    var filter2 = null;
 
     const colors = {
 
@@ -63,10 +65,134 @@
             .attr('height', measurements.height);
         d3.csv("pokemon.csv")
             .then((csvData) => data = csvData)
-            .then(() => makeScatterPlot())
+            .then(() => startErUp())
        
     }
 
+    function startErUp() {
+        const generations = [1, 2, 3, 4, 5, 6, 'All']
+        const legendary = ['True', 'False', 'All']
+
+        // get arrays of TOEFL Score and Chance of Admit
+        xAxisData = data.map((row) => parseInt(row[xAxisDataColumnName]))
+        yAxisData = data.map((row) => parseInt(row[yAxisDataColumnName]))
+
+        filter1 = d3.select('body')           
+            .append('select')
+            .attr('id', 'legendaryFilter')
+
+            .style('top', '80px')
+            .style('left', '40px')
+            .style('position','absolute')
+            .selectAll('option')
+            .data(legendary)
+            .enter()
+            .append('option')            
+            .attr('value', function (d) {
+                return d;
+            })
+            .html(function (d) {
+                return d;
+            });
+
+        filter1 = d3.select('#legendaryFilter');
+
+
+        filter1.on("change", function (e) {
+            console.log(filter1.value);
+            //e.options[e.selectedIndex].text
+            var generation = e.options[e.selectedIndex].text;
+            var legendarySelector = document.querySelector('#legendaryFilter');
+            var groupData = getFilteredData(data, generation, legendarySelector.value);
+            data = groupData;
+
+            updatePoints(groupData);
+            enterPoints(groupData);
+            exitPoints(groupData);
+            makeScatterPlot();
+
+        });
+
+
+        filter2 = d3.select('body')            
+            .append('select')
+            .attr('id', 'generationFilter')
+            .style('top', '80px')
+            .style('left', '100px')
+            .style('position', 'absolute')
+            .selectAll('option')
+            .data(generations)
+            .enter()
+            .append('option')
+            .html(function (d) {
+                return d;
+            }).attr('value', function (d) {
+                return d;
+            });
+
+        filter2 = d3.select('#generationFilter');
+
+
+        filter2.on("change",  function () {
+           // var legendary = e.options.text;
+
+            //var generationSelector = document.querySelector('#generationFilter');
+            var groupData = getFilteredData(data, filter1.value, filter2.value);
+            data = groupData;
+            updatePoints(groupData);
+            enterPoints(groupData);
+            exitPoints(groupData);
+            makeScatterPlot()
+
+        });
+
+        makeScatterPlot();
+    }
+
+    // Get a subset of the data based on the group
+    function getFilteredData(data, generation, legendary) {
+        return data.filter(function (point) {
+
+            return point.generation === parseInt(generation) && point.legendary === parseInt(legendary);
+        });
+    }
+
+    // Helper function to add new points to our data
+    function enterPoints(data) {
+        // Add the points!
+        svgContainer.selectAll(".point")
+            .data(data)
+            .enter().append("path")
+            .attr("class", "point")
+            .attr('fill', 'red')
+            //.attr("d", d3.svg.symbol().type("triangle-up"))
+            .attr("transform", function (d) { return "translate(" + x(d.x) + "," + y(d.y) + ")"; });
+    }
+
+    function exitPoints(data) {
+        svgContainer.selectAll(".point")
+            .data(data)
+            .exit()
+            .remove();
+    }
+
+    function updatePoints(data) {
+        svgContainer.selectAll(".point")
+            .data(data)
+            .transition()
+            .attr("transform", function (d) { return "translate(" + x(d.x) + "," + y(d.y) + ")"; });
+    }
+
+    // New select element for allowing the user to select a group!
+  //  var generationSelector = document.querySelector('#generationFilter');
+    //var legendarySelector = document.querySelector('#legendaryFilter');
+   // var newData = getFilteredData(data, $generationSelector.value, $legendarySelector.value );
+
+    // Enter initial points filtered by default select value set in HTML
+   // enterPoints(newData);
+
+
+    
 
     function makeScatterPlot() {
         // get arrays of TOEFL Score and Chance of Admit
@@ -86,6 +212,8 @@
         drawAxes(scaleX, scaleY);
 
         plotData(scaleX, scaleY);
+
+
 
         /*
         legend = d3.select('body')
@@ -131,6 +259,9 @@
         svgContainer.append('g')
             .attr('transform', 'translate(50, 0)')
             .call(yAxis)
+
+   
+
     }
 
     function plotData(scaleX, scaleY) {
@@ -156,6 +287,7 @@
             .attr('cx', xMap)
             .attr('cy', yMap)
             .attr('r', 3)
+            .attr("data-legend", function (d) { return d.name })
             .style('fill', function (d) {
                 return colors[d['Type 1']]
             })
@@ -180,10 +312,12 @@
                     .duration('200')
                     .style("opacity", 0);
             });
+
        
     }
 
-    
+   
+
 
     /*
 
