@@ -81,7 +81,6 @@
         filter1 = d3.select('body')           
             .append('select')
             .attr('id', 'legendaryFilter')
-
             .style('top', '80px')
             .style('left', '40px')
             .style('position','absolute')
@@ -141,6 +140,7 @@
 
             //var generationSelector = document.querySelector('#generationFilter');
             var groupData = getFilteredData(data, filter1.value, filter2.value);
+            console.log(groupData)
             data = groupData;
             //updatePoints(groupData);
             //enterPoints(groupData);
