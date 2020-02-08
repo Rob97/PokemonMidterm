@@ -4,6 +4,7 @@
 
 
     var data = "";
+    var filteredData = "";
     var svgContainer = "";
     var xAxisDataColumnName = "Sp. Def";
     var yAxisDataColumnName = "Total";
@@ -99,22 +100,24 @@
 
 
         filter1.on("change", function (e) {
-            console.log(filter1.value);
+            //console.log(filter1.value);
             //e.options[e.selectedIndex].text
-            var generation = e.options[e.selectedIndex].text;
+            var generation = document.querySelector("#generationFilter");//e.options[e.selectedIndex].text; <- I think this is the problem
             var legendarySelector = document.querySelector('#legendaryFilter');
-            var groupData = getFilteredData(data, generation, legendarySelector.value);
+            console.log(legendarySelector.value);    
+            var groupData = getFilteredData(data, generation.value, legendarySelector.value);
             data = groupData;
 
-            updatePoints(groupData);
-            enterPoints(groupData);
-            exitPoints(groupData);
+           //updatePoints(groupData);
+           //enterPoints(groupData);
+            //exitPoints(groupData);
             makeScatterPlot();
 
         });
 
+        
 
-        filter2 = d3.select('body')            
+        filter2 = d3.select('#chart')            
             .append('select')
             .attr('id', 'generationFilter')
             .style('top', '80px')
@@ -139,22 +142,37 @@
             //var generationSelector = document.querySelector('#generationFilter');
             var groupData = getFilteredData(data, filter1.value, filter2.value);
             data = groupData;
-            updatePoints(groupData);
-            enterPoints(groupData);
-            exitPoints(groupData);
+            //updatePoints(groupData);
+            //enterPoints(groupData);
+            //exitPoints(groupData);
             makeScatterPlot()
 
         });
 
         makeScatterPlot();
+
+        makeLegend();
     }
 
     // Get a subset of the data based on the group
     function getFilteredData(data, generation, legendary) {
+
+        if (generation === 'all' && legendary === 'all') {
+            filteredData = data;
+        } else if (generation === 'all') {
+            filteredData = data.filter((row) => row['Legendary'] === legendary);
+        } else if (legendary === 'all') {
+            filteredData = data.filter((row) => row['Generation'] === generation);
+        } else {
+            filteredData = data.filter((row) => row['Generation'] === generation && row['Legendary'] === legendary);
+        }
+        /*
         return data.filter(function (point) {
 
             return point.generation === parseInt(generation) && point.legendary === parseInt(legendary);
-        });
+        });*/
+
+        return filteredData;
     }
 
     // Helper function to add new points to our data
@@ -213,24 +231,39 @@
 
         plotData(scaleX, scaleY);
 
+       
+
+    }
 
 
-        /*
-        legend = d3.select('body')
-            .append("svg")
-            .append("g")
-            .attr("class", "legend")
-            .attr("transform", "translate(50,30)")
-            .style("font-size", "12px")
-            .call(d3.legend);
-        setTimeout(function () {
-            legend
-                .style("font-size", "20px")
-                .attr("data-style-padding", 10)
-                .call(d3.legend)
-        }, 1000)*/
 
+    function makeLegend() {
 
+        let legend = d3.select('#legend').style('top', '80px')
+            .style('right', '50px')
+            .style('position', 'absolute');
+
+        let types = []
+        for (let type in colors) types.push(type)
+
+        legend.selectAll('circle')
+            .data(types)
+            .enter()
+            .append('circle')
+            .attr('cx', 20)
+            .attr("cy", (d, i) => 20 + i * 25)
+            .attr("r", 7)
+            .style("fill", (d) => colors[d])
+
+        legend.selectAll("labels")
+            .data(types)
+            .enter()
+            .append("text")
+            .attr("x", 40)
+            .attr("y", (d, i) => 22 + i * 25)
+            .text((d) => d)
+            .attr("text-anchor", "left")
+            .style("alignment-baseline", "middle")
     }
 
 
