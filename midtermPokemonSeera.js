@@ -3,8 +3,9 @@
 (function () {
 
 
-    var data = "";
-    var filteredData = "";
+    var data = null;
+    var unfilteredData = null;
+    var filteredData = null;
     var svgContainer = "";
     var xAxisDataColumnName = "Sp. Def";
     var yAxisDataColumnName = "Total";
@@ -66,12 +67,13 @@
             .attr('height', measurements.height);
         d3.csv("pokemon.csv")
             .then((csvData) => data = csvData)
+            .then(unfilteredData = data)
             .then(() => startErUp())
        
     }
 
     function startErUp() {
-        const generations = [1, 2, 3, 4, 5, 6, 'All']
+        const generations = ['1', '2', '3', '4', '5', '6', 'All']
         const legendary = ['True', 'False', 'All']
 
         // get arrays of TOEFL Score and Chance of Admit
@@ -103,8 +105,8 @@
             //e.options[e.selectedIndex].text
             var generation = document.querySelector("#generationFilter");//e.options[e.selectedIndex].text; <- I think this is the problem
             var legendarySelector = document.querySelector('#legendaryFilter');
-            console.log(legendarySelector.value);    
-            var groupData = getFilteredData(data, generation.value, legendarySelector.value);
+            console.log(legendarySelector.value);
+            var groupData = getFilteredData(unfilteredData, generation.value, legendarySelector.value);
             data = groupData;
 
            //updatePoints(groupData);
@@ -137,9 +139,10 @@
 
         filter2.on("change",  function () {
            // var legendary = e.options.text;
-
+            var generation = document.querySelector("#generationFilter");//e.options[e.selectedIndex].text; <- I think this is the problem
+            var legendarySelector = document.querySelector('#legendaryFilter');
             //var generationSelector = document.querySelector('#generationFilter');
-            var groupData = getFilteredData(data, filter1.value, filter2.value);
+            var groupData = getFilteredData(unfilteredData, generation.value, legendarySelector.value);
             console.log(groupData)
             data = groupData;
             //updatePoints(groupData);
@@ -157,14 +160,14 @@
     // Get a subset of the data based on the group
     function getFilteredData(data, generation, legendary) {
 
-        if (generation === 'all' && legendary === 'all') {
+        if (generation == 'all' && legendary == 'all') {
             filteredData = data;
-        } else if (generation === 'all') {
-            filteredData = data.filter((row) => row['Legendary'] === legendary);
-        } else if (legendary === 'all') {
-            filteredData = data.filter((row) => row['Generation'] === generation);
+        } else if (generation == 'all') {
+            filteredData = data.filter((row) => row['Legendary'] == legendary);
+        } else if (legendary == 'all') {
+            filteredData = data.filter((row) => row['Generation'] == generation);
         } else {
-            filteredData = data.filter((row) => row['Generation'] === generation && row['Legendary'] === legendary);
+            filteredData = data.filter((row) => row['Generation'] == generation && row['Legendary'] == legendary);
         }
         /*
         return data.filter(function (point) {
@@ -213,6 +216,10 @@
     
 
     function makeScatterPlot() {
+
+        svgContainer.selectAll('*').remove();
+
+     
         // get arrays of TOEFL Score and Chance of Admit
         xAxisData = data.map((row) => parseInt(row[xAxisDataColumnName]))
         yAxisData = data.map((row) => parseInt(row[yAxisDataColumnName]))
