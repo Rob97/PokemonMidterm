@@ -67,14 +67,14 @@
             .attr('height', measurements.height);
         d3.csv("pokemon.csv")
             .then((csvData) => data = csvData)
-            .then(unfilteredData = data)
+            .then(() => unfilteredData = data)
             .then(() => startErUp())
        
     }
 
     function startErUp() {
-        const generations = ['1', '2', '3', '4', '5', '6', 'All']
-        const legendary = ['True', 'False', 'All']
+        const generations = ['All', '1', '2', '3', '4', '5', '6']
+        const legendary = ['All', 'True', 'False']
 
         // get arrays of TOEFL Score and Chance of Admit
         xAxisData = data.map((row) => parseInt(row[xAxisDataColumnName]))
@@ -160,11 +160,11 @@
     // Get a subset of the data based on the group
     function getFilteredData(data, generation, legendary) {
 
-        if (generation == 'all' && legendary == 'all') {
+        if (generation == 'All' && legendary == 'All') {
             filteredData = data;
-        } else if (generation == 'all') {
+        } else if (generation == 'All') {
             filteredData = data.filter((row) => row['Legendary'] == legendary);
-        } else if (legendary == 'all') {
+        } else if (legendary == 'All') {
             filteredData = data.filter((row) => row['Generation'] == generation);
         } else {
             filteredData = data.filter((row) => row['Generation'] == generation && row['Legendary'] == legendary);
