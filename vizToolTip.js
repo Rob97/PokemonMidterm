@@ -20,7 +20,7 @@ const marginTooltip = {top: 50, right: 50, bottom: 50, left: 100}
 , heightTooltip = 300 - margin.top - margin.bottom // Use the window's height
 
 // load data
-d3.csv('C:\Users\Sohrab\Source\Repos\Rob97.github.io\gapminder.csv').then((allData) => {
+d3.csv('gapminder.csv').then((allData) => {
     console.log(allData)    
     // append the div which will be the tooltip
     // append tooltipSvg to this div
@@ -43,13 +43,13 @@ d3.csv('C:\Users\Sohrab\Source\Repos\Rob97.github.io\gapminder.csv').then((allDa
 
 
     // get only data for USA
-    var usaData = allData.filter(d => d['country'] === "United States");
+   // var usaData = allData.filter(d => d['country'] === "United States");
     
 
-        // 1980data = allData.filter(d => d['year'] == "1980")
+        data = allData.filter(d => d['year'] == "1980")
 
     //WONT LOG DATA
-    console.log(usaData)
+    console.log(data)
 
     // get year min and max for us
     const yearLimits = d3.extent(data, d => d['fertility'])
@@ -69,7 +69,7 @@ d3.csv('C:\Users\Sohrab\Source\Repos\Rob97.github.io\gapminder.csv').then((allDa
 
   
     // get min and max life expectancy for United States
-    const lifeExpectancyLimits = d3.extent(usaData, d => d['life_expectancy']) 
+    const lifeExpectancyLimits = d3.extent(data, d => d['life_expectancy']) 
 
     // get scaling function for y axis
     const yScale = d3.scaleLinear()
