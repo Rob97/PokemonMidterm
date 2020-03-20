@@ -10,6 +10,9 @@
  * 2. talk about how geoAlbers() is a scaling function
  * 3. show how to plot points with geoAlbers
  */
+
+"use strict";
+(function () {
 const m = {
     width: 1200,
     height: 1000
@@ -25,7 +28,7 @@ const g = svg.append('g')
 // neighborhoods.json taken from rat map example
 d3.json('C:\Users\Sohrab\Source\Repos\Rob97.github.io\nygeo.json').then(function (data) {
     console.log("I entered JSON function")
-    d3.csv('C:\Users\Sohrab\Source\Repos\Rob97.github.io\data.csv.crdownload').then(function (pointData) {
+    d3.csv('C:\Users\Sohrab\Source\Repos\Rob97.github.io\data.csv').then(function (pointData) {
 
         console.log("I entered csv function")
 
@@ -55,18 +58,30 @@ d3.json('C:\Users\Sohrab\Source\Repos\Rob97.github.io\nygeo.json').then(function
             .enter()
             .append('circle')
             .attr('cx', function (d) {
-                let scaledPoints = aProj([d['longitude'], d['latitude']])
+                let scaledPoints = albersProj([d['longitude'], d['latitude']])
                 return scaledPoints[0]
             })
             .attr('cy', function (d) {
-                let scaledPoints = aProj([d['longitude'], d['latitude']])
+                let scaledPoints = albersProj([d['longitude'], d['latitude']])
                 return scaledPoints[1]
             })
             .attr('r', 3)
             .attr('fill', 'steelblue')
-           
+            .on("click", function (d) {
+                d3.select(this)
+                    .attr("opacity", 1)
+                    .transition()
+                    .duration(1000)
+                    .attr("cx", m.width * Math.round(Math.random()))
+                    .attr("cy", m.height * Math.round(Math.random()))
+                    .attr("opacity", 0)
+                    .on("end", function () {
+                        d3.select(this).remove();
+                    })
+            })
 
 
     })
 
 })
+})();
