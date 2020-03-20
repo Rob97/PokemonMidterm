@@ -21,7 +21,7 @@ const marginTooltip = {top: 50, right: 50, bottom: 50, left: 100}
 
 // load data
 d3.csv('C:\Users\Sohrab\Source\Repos\Rob97.github.io\gapminder.csv').then((allData) => {
-    console.log(allData)
+    console.log(allData)    
     // append the div which will be the tooltip
     // append tooltipSvg to this div
     const div = d3.select('body').append('div')
@@ -46,7 +46,7 @@ d3.csv('C:\Users\Sohrab\Source\Repos\Rob97.github.io\gapminder.csv').then((allDa
     var usaData = allData.filter(d => d['country'] === "United States");
     
 
-        // 1980 data = allData.filter(d => d['year'] == "1980")
+        // 1980data = allData.filter(d => d['year'] == "1980")
 
     //WONT LOG DATA
     console.log(usaData)
@@ -82,7 +82,66 @@ d3.csv('C:\Users\Sohrab\Source\Repos\Rob97.github.io\gapminder.csv').then((allDa
         .call(d3.axisLeft(yScale))
 
    
-    
+    // append dots to svg to track data points
+    svg.selectAll('.dot')
+        .data(data)
+        .enter()
+        .append('circle')
+        .attr('cx', d => xScale(d['fertility']))
+        .attr('cy', d => yScale(d['life_expectancy']))
+        .attr('r', 4)
+        .attr('fill', 'steelblue')
+        // get rid of .html
+        .on("mouseover", function (d) {
+            tooltipSvg.selectAll("g").remove()
+            tooltipSvg.selectAll("path").remove()
+
+            const dataCountry = dataPure.filter(dd => dd['country'] == d['country'])
+            const year2Limits = [dataCountry[0]['year'], dataCountry[dataCountry.length - 1]['year']]
+            people = (dataCountry.map((row) => { return row['population'] })).filter(word => word != 'NA')
+            const populationLimits = [dataCountry[0]['population'], people[people.length - 1]]
+
+            const xScale2 = d3.scaleLinear()
+                .domain([year2Limits[0], year2Limits[1]])
+                .range([marginTooltip.left, widthTooltip + marginTooltip.left])
+
+            const xAxis2 = tooltipSvg.append("g")
+                .attr("transform", "translate(0," + (heightTooltip + marginTooltip.top) + ")")
+                .call(d3.axisBottom(xScale2))
+
+            const yScale2 = d3.scaleLinear()
+                .domain([populationLimits[1], populationLimits[0]])
+                .range([marginTooltip.top, marginTooltip.top + heightTooltip])
+
+            const yAxis2 = tooltipSvg.append("g")
+                .attr("transform", "translate(" + marginTooltip.left + ",0)")
+                .call(d3.axisLeft(yScale2))
+
+            const line = d3.line()
+                .x(d => xScale2(d['year'])) // set the x values for the line generator
+                .y(d => yScale2(d['population'])) // set the y values for the line generator 
+
+            // append line to svg
+            tooltipSvg.append("path")
+                // difference between data and datum:
+                // https://stackoverflow.com/questions/13728402/what-is-the-difference-d3-datum-vs-data
+                .datum(dataCountry)
+                .attr("d", function (d) { return line(d) })
+                .attr("fill", "steelblue")
+                .attr("stroke", "steelblue")
+
+            div.transition()
+                .duration(200)
+                .style('opacity', 0.9)
+
+            div.style('left', d3.event.pageX + "px")
+                .style('top', (d3.event.pageY - 28) + "px")
+        })
+        .on("mouseout", function (d) {
+            div.transition()
+                .duration(300)
+                .style('opacity', 0)
+        })
   
 
     svg.selectAll("text")
