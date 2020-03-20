@@ -26,9 +26,9 @@ const g = svg.append('g')
 
 
 // neighborhoods.json taken from rat map example
-d3.json('C:\Users\Sohrab\Source\Repos\Rob97.github.io\nygeo.json').then(function (data) {
+d3.json('nygeo.json').then(function (data) {
     console.log("I entered JSON function")
-    d3.csv('C:\Users\Sohrab\Source\Repos\Rob97.github.io\data.csv').then(function (pointData) {
+    d3.csv('data.csv').then(function (pointData) {
 
         console.log("I entered csv function")
 
@@ -40,17 +40,16 @@ d3.json('C:\Users\Sohrab\Source\Repos\Rob97.github.io\nygeo.json').then(function
 
         
 
-        const geoPath = d3.geoPath()
+        const path = d3.geoPath()
             .projection(aProj)
-
        
 
         g.selectAll('path')
             .data(data.features)
             .enter()
             .append('path')
-            .attr('fill', '#ccc')
-            .attr('d', geoPath)
+            .attr('fill', '#b1b6bd')
+            .attr('d', path)
 
         // plots circles on the boston map
         g.selectAll('.circle')
@@ -58,11 +57,11 @@ d3.json('C:\Users\Sohrab\Source\Repos\Rob97.github.io\nygeo.json').then(function
             .enter()
             .append('circle')
             .attr('cx', function (d) {
-                let scaledPoints = albersProj([d['longitude'], d['latitude']])
+                let scaledPoints = aProj([d['longitude'], d['latitude']])
                 return scaledPoints[0]
             })
             .attr('cy', function (d) {
-                let scaledPoints = albersProj([d['longitude'], d['latitude']])
+                let scaledPoints = aProj([d['longitude'], d['latitude']])
                 return scaledPoints[1]
             })
             .attr('r', 3)
@@ -70,6 +69,8 @@ d3.json('C:\Users\Sohrab\Source\Repos\Rob97.github.io\nygeo.json').then(function
             .on("click", function (d) {
                 d3.select(this)
                     .attr("opacity", 1)
+                    .attr("r", '20')
+                    .attr('fill', '#ff0000')
                     .transition()
                     .duration(1000)
                     .attr("cx", m.width * Math.round(Math.random()))
@@ -83,5 +84,7 @@ d3.json('C:\Users\Sohrab\Source\Repos\Rob97.github.io\nygeo.json').then(function
 
     })
 
-})
+}).catch((error) => {
+    console.log(error);
+});
 })();
